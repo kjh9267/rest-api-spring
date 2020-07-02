@@ -1,6 +1,7 @@
 package me.jun.restapispring.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import me.jun.restapispring.common.TestDescription;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +32,7 @@ public class EventControllerTest {
     ObjectMapper objectMapper;
 
     @Test
+    @TestDescription("정상적인 이벤트 생성 테스트.")
     public void createEvent() throws Exception {
         EventDto event = EventDto.builder()
                 .name("Spring")
@@ -61,6 +63,7 @@ public class EventControllerTest {
     }
 
     @Test
+    @TestDescription("생성해서는 안되는 필드 생성 테스트.")
     public void createEvent_Bad_Request() throws Exception {
         Event event = Event.builder()
                 .id(100)
@@ -88,6 +91,7 @@ public class EventControllerTest {
     }
 
     @Test
+    @TestDescription("비어있는 입력 값 생성 테스트")
     public void createEvent_Bad_Request_Empty_Input() throws Exception {
         EventDto eventDto = EventDto.builder().build();
 
@@ -99,6 +103,7 @@ public class EventControllerTest {
     }
 
     @Test
+    @TestDescription("잘못된 입력 값 생성 테스트.")
     public void createEvent_Bad_Request_Wrong_Input() throws Exception {
         EventDto eventDto = EventDto.builder()
                 .name("Spring")
