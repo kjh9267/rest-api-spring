@@ -33,7 +33,7 @@ public class EventController {
 
     @PostMapping
     public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
-        //empty input
+        // empty input, invalid fields
         if (errors.hasErrors()) {
             return ResponseEntity.badRequest().body(errors);
         }
