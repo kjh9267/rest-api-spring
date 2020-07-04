@@ -33,7 +33,12 @@ public class EventController {
 
     @PostMapping
     public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
+        //empty input
+        if (errors.hasErrors()) {
+            return ResponseEntity.badRequest().body(errors);
+        }
 
+        // wrong input
         eventValidator.validate(eventDto, errors);
         if (errors.hasErrors()) {
             return ResponseEntity.badRequest().body(errors);
