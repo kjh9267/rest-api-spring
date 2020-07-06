@@ -1,6 +1,6 @@
 package me.jun.restapispring.accounts;
 
-public enum AccountType {
+public enum AccountRole {
 
     ADMIN, USER
 }
