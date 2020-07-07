@@ -1,16 +1,11 @@
 package me.jun.restapispring.configs;
 
-import me.jun.restapispring.accounts.Account;
-import me.jun.restapispring.accounts.AccountRole;
 import me.jun.restapispring.accounts.AccountService;
 import me.jun.restapispring.common.AppProperties;
-import me.jun.restapispring.common.BaseControllerTest;
+import me.jun.restapispring.common.BaseTest;
 import me.jun.restapispring.common.TestDescription;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -18,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class AuthServerConfigTest extends BaseControllerTest {
+public class AuthServerConfigTest extends BaseTest {
 
     @Autowired
     AccountService accountService;
