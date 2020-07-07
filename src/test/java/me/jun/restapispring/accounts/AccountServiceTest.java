@@ -1,5 +1,6 @@
 package me.jun.restapispring.accounts;
 
+import me.jun.restapispring.common.AppProperties;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,28 +33,19 @@ public class AccountServiceTest {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Autowired
+    AppProperties appProperties;
+
     @Test
     public void findByUserName() {
         // Given
-        HashSet<AccountRole> roles = new HashSet<>();
-        roles.add(AccountRole.ADMIN);
-        roles.add(AccountRole.USER);
-        String password = "pass";
-        String userName = "user@email.com";
-
-        Account account = Account.builder()
-                .email(userName)
-                .password(password)
-                .roles(roles)
-                .build();
-
-        accountService.saveAccount(account);
+        // Initialized in Application Runner in AppConfig class.
 
         // When
-        UserDetails userDetails = accountService.loadUserByUsername(userName);
+        UserDetails userDetails = accountService.loadUserByUsername(appProperties.getUserEmail());
 
         // Then
-        assertThat(passwordEncoder.matches(password, userDetails.getPassword())).isTrue();
+        assertThat(passwordEncoder.matches(appProperties.getUserPassword(), userDetails.getPassword())).isTrue();
     }
 
     @Test
