@@ -5,7 +5,7 @@ import me.jun.restapispring.accounts.AccountRepository;
 import me.jun.restapispring.accounts.AccountRole;
 import me.jun.restapispring.accounts.AccountService;
 import me.jun.restapispring.common.AppProperties;
-import me.jun.restapispring.common.BaseControllerTest;
+import me.jun.restapispring.common.BaseTest;
 import me.jun.restapispring.common.TestDescription;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
-public class EventControllerTest extends BaseControllerTest {
+public class EventControllerTest extends BaseTest {
 
     @Autowired
     EventRepository eventRepository;
@@ -252,7 +252,8 @@ public class EventControllerTest extends BaseControllerTest {
     @TestDescription("존재하는 이벤트 1개 조회")
     public void getEvent() throws Exception {
         // Given
-        Event event = generateEvent(99);
+        Account account = createAccount();
+        Event event = generateEvent(99, account);
 
         // When & Then
         mockMvc.perform(get("/api/events/{id}", event.getId()))
@@ -276,14 +277,15 @@ public class EventControllerTest extends BaseControllerTest {
     @TestDescription("정상적인 이벤트 수정")
     public void updateEvent() throws Exception {
         // Given
-        Event event = generateEvent(11);
+        Account account = createAccount();
+        Event event = generateEvent(11, account);
         String updatedName = "Updated name";
         EventDto eventDto = modelMapper.map(event, EventDto.class);
         eventDto.setName(updatedName);
 
         // When & Then
         mockMvc.perform(put("/api/events/{id}", event.getId())
-                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken(false))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaTypes.HAL_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(eventDto))
@@ -354,38 +356,44 @@ public class EventControllerTest extends BaseControllerTest {
                 .andDo(document("update-event"));
     }
 
-    private Event generateEvent(int idx) {
-        Event event = Event.builder()
-                .name("Spring " + idx)
-                .description("Rest API")
-                .beginEnrollmentDateTime(LocalDateTime.of(1970, 1, 1, 0, 0,0))
-                .closeEnrollmentDateTime(LocalDateTime.of(1970, 1, 2, 0, 0, 0))
-                .beginEventDateTime(LocalDateTime.of(1970, 1, 3, 0, 0, 0))
-                .endEventDateTime(LocalDateTime.of(1970, 1, 4, 0, 0, 0))
-                .basePrice(100)
-                .maxPrice(200)
-                .limitOfEnrollment(100)
-                .location("seoul")
-                .build();
-
+    private Event generateEvent(int idx, Account account) {
+        Event event = buildEvent(idx);
+        event.setAccount(account);
         return eventRepository.save(event);
     }
 
-    public String getBearerToken() throws Exception {
-        return "bearer " + getAuthToken();
+    private Event generateEvent(int idx) {
+        Event event = buildEvent(idx);
+        return eventRepository.save(event);
     }
 
-    public String getAuthToken() throws Exception {
-        Set<AccountRole> roles = new HashSet<>();
-        roles.add(AccountRole.USER);
-        roles.add(AccountRole.ADMIN);
+    private Event buildEvent(int idx) {
+        return Event.builder()
+                    .name("Spring " + idx)
+                    .description("Rest API")
+                    .beginEnrollmentDateTime(LocalDateTime.of(1970, 1, 1, 0, 0,0))
+                    .closeEnrollmentDateTime(LocalDateTime.of(1970, 1, 2, 0, 0, 0))
+                    .beginEventDateTime(LocalDateTime.of(1970, 1, 3, 0, 0, 0))
+                    .endEventDateTime(LocalDateTime.of(1970, 1, 4, 0, 0, 0))
+                    .basePrice(100)
+                    .maxPrice(200)
+                    .limitOfEnrollment(100)
+                    .location("seoul")
+                    .build();
+    }
 
-        Account account = Account.builder()
-                .email(appProperties.getAdminEmail())
-                .password(appProperties.getAdminPassword())
-                .roles(roles)
-                .build();
-        accountService.saveAccount(account);
+    public String getBearerToken() throws Exception {
+        return getBearerToken(true);
+    }
+
+    public String getBearerToken(boolean needToCreateAccount) throws Exception {
+        return "bearer " + getAuthToken(needToCreateAccount);
+    }
+
+    public String getAuthToken(boolean needToCreateAccount) throws Exception {
+        if (needToCreateAccount) {
+            createAccount();
+        }
 
         ResultActions perform = mockMvc.perform(post("/oauth/token")
                     .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret()))
@@ -397,5 +405,18 @@ public class EventControllerTest extends BaseControllerTest {
         String responseBody = perform.andReturn().getResponse().getContentAsString();
         Jackson2JsonParser parser = new Jackson2JsonParser();
         return parser.parseMap(responseBody).get("access_token").toString();
+    }
+
+    private Account createAccount() {
+        Set<AccountRole> roles = new HashSet<>();
+        roles.add(AccountRole.USER);
+        roles.add(AccountRole.ADMIN);
+
+        Account account = Account.builder()
+                .email(appProperties.getAdminEmail())
+                .password(appProperties.getAdminPassword())
+                .roles(roles)
+                .build();
+        return accountService.saveAccount(account);
     }
 }
