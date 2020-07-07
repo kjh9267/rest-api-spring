@@ -37,7 +37,7 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients.inMemory() // Just Test for in memory.
+        clients.inMemory() // Use in memory for test.
                 .withClient("myApp")
                 .authorizedGrantTypes("password", "refresh_token")
                 .scopes("read", "write")
