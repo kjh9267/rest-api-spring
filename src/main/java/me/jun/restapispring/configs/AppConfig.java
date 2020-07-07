@@ -3,6 +3,7 @@ package me.jun.restapispring.configs;
 import me.jun.restapispring.accounts.Account;
 import me.jun.restapispring.accounts.AccountRole;
 import me.jun.restapispring.accounts.AccountService;
+import me.jun.restapispring.common.AppProperties;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -36,19 +37,29 @@ public class AppConfig {
             @Autowired
             AccountService accountService;
 
+            @Autowired
+            AppProperties appProperties;
+
             @Override
             public void run(ApplicationArguments args) throws Exception {
-                Set<AccountRole> roles = new HashSet<>();
-                roles.add(AccountRole.ADMIN);
-                roles.add(AccountRole.USER);
+                Set<AccountRole> adminRoles = new HashSet<>();
+                Set<AccountRole> userRoles = new HashSet<>();
+                adminRoles.add(AccountRole.ADMIN);
+                userRoles.add(AccountRole.USER);
 
                 Account admin = Account.builder()
-                        .email("admin@email.com")
-                        .password("pass")
-                        .roles(roles)
+                        .email(appProperties.getAdminEmail())
+                        .password(appProperties.getAdminPassword())
+                        .roles(adminRoles)
                         .build();
-
                 accountService.saveAccount(admin);
+
+                Account user = Account.builder()
+                        .email(appProperties.getUserEmail())
+                        .password(appProperties.getUserPassword())
+                        .roles(userRoles)
+                        .build();
+                accountService.saveAccount(user);
             }
         };
     }

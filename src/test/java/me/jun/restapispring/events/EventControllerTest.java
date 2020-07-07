@@ -4,9 +4,9 @@ import me.jun.restapispring.accounts.Account;
 import me.jun.restapispring.accounts.AccountRepository;
 import me.jun.restapispring.accounts.AccountRole;
 import me.jun.restapispring.accounts.AccountService;
+import me.jun.restapispring.common.AppProperties;
 import me.jun.restapispring.common.BaseControllerTest;
 import me.jun.restapispring.common.TestDescription;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +43,11 @@ public class EventControllerTest extends BaseControllerTest {
     @Autowired
     AccountRepository accountRepository;
 
-    @After
-    public void flushDateBase() {
+    @Autowired
+    AppProperties appProperties;
+
+    @Before
+    public void flushTables() {
         eventRepository.deleteAll();
         accountRepository.deleteAll();
     }
@@ -351,26 +354,21 @@ public class EventControllerTest extends BaseControllerTest {
     }
 
     public String getAuthToken() throws Exception {
-        String email = "user@email.com";
-        String password = "pass";
         Set<AccountRole> roles = new HashSet<>();
         roles.add(AccountRole.USER);
         roles.add(AccountRole.ADMIN);
 
         Account account = Account.builder()
-                .email(email)
-                .password(password)
+                .email(appProperties.getAdminEmail())
+                .password(appProperties.getAdminPassword())
                 .roles(roles)
                 .build();
         accountService.saveAccount(account);
 
-        String clientId = "myApp";
-        String clientSecret = "pass";
-
         ResultActions perform = mockMvc.perform(post("/oauth/token")
-                    .with(httpBasic(clientId, clientSecret))
-                    .param("username", email)
-                    .param("password", password)
+                    .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret()))
+                    .param("username", appProperties.getAdminEmail())
+                    .param("password", appProperties.getAdminPassword())
                     .param("grant_type", "password"))
                 .andDo(print());
 
